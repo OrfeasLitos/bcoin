@@ -13,39 +13,40 @@ async function delay(ms) {
 }
 
 const regtest = Network.get().toString();
-const one = new bcoin.FullNode({
+const spvNode = new bcoin.SPVNode({
   network: regtest,
   httpPort: 48449 // avoid clash of ports
 });
 
-const two = new bcoin.FullNode({
+const fullNode = new bcoin.FullNode({
   network: regtest,
   port: 48445,
+  bip37: true, // accept SPV nodes
   listen: true
 });
 
 (async () => {
-  await one.open();
-  await two.open();
+  await spvNode.open();
+  await fullNode.open();
 
-  await one.connect();
-  await two.connect();
+  await spvNode.connect();
+  await fullNode.connect();
 
   const addr = new NetAddress({
-    port: two.pool.options.port
     host: '127.0.0.1',
+    port: fullNode.pool.options.port
   });
-  const peer = one.pool.createOutbound(addr);
-  one.pool.peers.add(peer);
+  const peer = spvNode.pool.createOutbound(addr);
+  spvNode.pool.peers.add(peer);
 
   // allow some time to establish connection
   await delay(4000);
 
-  await two.disconnect();
-  await one.disconnect();
+  await fullNode.disconnect();
+  await spvNode.disconnect();
 
-  await two.close();
-  await one.close();
+  await fullNode.close();
+  await spvNode.close();
 
   console.log('success!');
 })();
