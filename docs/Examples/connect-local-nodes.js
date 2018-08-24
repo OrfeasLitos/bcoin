@@ -43,6 +43,10 @@ const fullNode = new bcoin.FullNode({
     port: fullNode.pool.options.port
   });
   const peer = spvNode.pool.createOutbound(addr);
+
+  // allow some time for spvNode to figure
+  // out that its peer list is empty
+  await delay(800);
   // connect spvNode with fullNode
   spvNode.pool.peers.add(peer);
 
