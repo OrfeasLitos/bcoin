@@ -13,6 +13,8 @@ async function delay(ms) {
 }
 
 const regtest = Network.get().toString();
+
+// create nodes
 const spvNode = new bcoin.SPVNode({
   network: regtest,
   httpPort: 48449 // avoid clash of ports
@@ -24,29 +26,38 @@ const fullNode = new bcoin.FullNode({
   bip37: true, // accept SPV nodes
   listen: true
 });
+// nodes created!
 
 (async () => {
+  // start nodes
   await spvNode.open();
   await fullNode.open();
 
   await spvNode.connect();
   await fullNode.connect();
+  // nodes started!
 
+  // get peer from known address
   const addr = new NetAddress({
     host: '127.0.0.1',
     port: fullNode.pool.options.port
   });
   const peer = spvNode.pool.createOutbound(addr);
+  // connect spvNode with fullNode
   spvNode.pool.peers.add(peer);
 
   // allow some time to establish connection
   await delay(4000);
 
+  // nodes are now connected!
+
+  // closing nodes
   await fullNode.disconnect();
   await spvNode.disconnect();
 
   await fullNode.close();
   await spvNode.close();
+  // nodes closed
 
   console.log('success!');
 })();
