@@ -2,7 +2,7 @@
 
 // Usage: $ node ./docs/Examples/connect-local-nodes.js
 
-const bcoin = require("../..").set("regtest");
+const bcoin = require('../..').set('regtest');
 const NetAddress = bcoin.net.NetAddress;
 const Network = bcoin.Network;
 
@@ -32,8 +32,8 @@ const two = new bcoin.FullNode({
   await two.connect();
 
   const addr = new NetAddress({
-    host: "127.0.0.1",
     port: two.pool.options.port
+    host: '127.0.0.1',
   });
   const peer = one.pool.createOutbound(addr);
   one.pool.peers.add(peer);
@@ -47,5 +47,5 @@ const two = new bcoin.FullNode({
   await two.close();
   await one.close();
 
-  console.log("success!");
+  console.log('success!');
 })();
