@@ -24,7 +24,7 @@ const spvNode = new bcoin.SPVNode({
 const fullNode = new bcoin.FullNode({
   network: regtest,
   port: 48445,
-  bip37: true, // accept SPV nodes
+  bip37: true, // accept SPV peers
   listen: true
 });
 // nodes created!
