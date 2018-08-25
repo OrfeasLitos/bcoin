@@ -29,6 +29,19 @@ const fullNode = new bcoin.FullNode({
 });
 // nodes created!
 
+// resolves only when the first successfully
+// connected peer is the one in the input
+async function waitToConnect(peer) {
+  const promise = new Promise((resolve, reject) => {
+    spvNode.pool.on('peer open', newPeer => {
+      if (peer.hostname() === newPeer.hostname())
+        resolve();
+      else{
+        reject();}
+    });
+  });
+}
+
 (async () => {
   // start nodes
   await spvNode.open();
@@ -56,8 +69,13 @@ const fullNode = new bcoin.FullNode({
   const peer = spvNode.pool.createOutbound(addr);
   spvNode.pool.peers.add(peer);
 
-  // allow some time to establish connection
-  await delay(4000);
+  // wait for peer to connect
+  try {
+    await waitToConnect(peer);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
 
   // nodes are now connected!
   console.log('spvNode\'s peers after connection:', spvNode.pool.peers.head());
