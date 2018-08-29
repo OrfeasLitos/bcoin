@@ -5,6 +5,7 @@
 const bcoin = require('../..').set('regtest');
 const NetAddress = bcoin.net.NetAddress;
 const Network = bcoin.Network;
+const pEvent = require('p-event'); // tool to await for events
 
 async function delay(ms) {
   return new Promise(resolve => {
@@ -45,18 +46,6 @@ const fullNode = new bcoin.FullNode({
 });
 // nodes created!
 
-// resolves only when the first successfully
-// connected peer is the one in the input
-async function waitToConnect(peer) {
-  const promise = new Promise((resolve, reject) => {
-    spvNode.pool.on('peer open', newPeer => {
-      if (peer.hostname() === newPeer.hostname())
-        resolve();
-      else{
-        reject();}
-    });
-  });
-}
 
 (async () => {
   // creates directory at `prefix`
@@ -88,15 +77,10 @@ async function waitToConnect(peer) {
   const peer = spvNode.pool.createOutbound(addr);
   spvNode.pool.peers.add(peer);
 
-  // wait for peer to connect
-  try {
-    await waitToConnect(peer);
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
-  }
-
+  // await to establish connection
+  await pEvent(spvNode.pool, 'peer connect');
   // nodes are now connected!
+
   console.log('spvNode\'s peers after connection:', spvNode.pool.peers.head());
 
   // closing nodes
