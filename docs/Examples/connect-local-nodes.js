@@ -2,6 +2,10 @@
 
 // Usage: $ node ./docs/Examples/connect-local-nodes.js
 
+// necessary for portability
+const os = require('os');
+const path = require('path');
+
 const bcoin = require('../..').set('regtest');
 const NetAddress = bcoin.net.NetAddress;
 const Network = bcoin.Network;
@@ -14,6 +18,10 @@ async function delay(ms) {
 }
 
 const regtest = Network.get().toString();
+const logPrefix = path.format({
+  dir: os.homedir(),
+  base: 'connect-test'
+})
 
 // create nodes
 const spvNode = new bcoin.SPVNode({
@@ -21,7 +29,7 @@ const spvNode = new bcoin.SPVNode({
   httpPort: 48449, // avoid clash of ports
 
   // write log file and chain data to specific directory
-  prefix: '~/connect-test/SPV',
+  prefix: path.format({dir: logPrefix, base: 'SPV'}),
   memory: false,
   logFile: true,
   logConsole: false,
@@ -38,7 +46,7 @@ const fullNode = new bcoin.FullNode({
   listen: true,
 
   // write log file and chain data to specific directory
-  prefix: '~/connect-test/FULL',
+  prefix: path.format({dir: logPrefix, base: 'FULL'}),
   memory: false,
   logFile: true,
   logConsole: false,
